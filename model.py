@@ -23,7 +23,6 @@ if response.status_code == 200:
     df = df.sort_index(ascending=False)
     df = df.astype(float)
     df_252 = df.head(252)
-    print(df_252)
 else:
     print(f"Error: {response.status_code}")
 
@@ -34,5 +33,4 @@ def get_volatility(df):
     volatility = np.std(df["Close"].values)
     return volatility
 
-print(get_volatility(df_252))
     
