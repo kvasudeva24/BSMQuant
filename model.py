@@ -33,4 +33,8 @@ def get_volatility(df):
     volatility = np.std(df["Close"].values)
     return volatility
 
+final_df = pd.DataFrame(columns = ["Name", "Ticker", "Stock Price", "Volatility"])
+xom = np.array(["Exxon Mobil Corporation", "XOM", df_252["Close"].iloc[0], get_volatility(df_252)])
+final_df.loc[0] = xom
+print(final_df)
     
