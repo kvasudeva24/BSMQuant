@@ -29,31 +29,6 @@ energy_companies = [
     ("SLB", "Schlumberger Limited"),
     ("OKE", "ONEOK, Inc."),
     ("MPLX", "MPLX LP"),
-    ("PSX", "Phillips 66"),
-    ("TNCAF", "TC Energy Corporation"),
-    ("LNG", "Cheniere Energy, Inc."),
-    ("MPC", "Marathon Petroleum Corporation"),
-    ("SU", "Suncor Energy Inc."),
-    ("TRP", "TC Energy Corporation"),
-    ("FANG", "Diamondback Energy, Inc."),
-    ("HES", "Hess Corporation"),
-    ("OXY", "Occidental Petroleum Corporation"),
-    ("EIPAF", "Eni S.p.A."),
-    ("E", "Eni S.p.A."),
-    ("BKR", "Baker Hughes Company"),
-    ("TRGP", "Targa Resources Corp."),
-    ("VLO", "Valero Energy Corporation"),
-    ("IMO", "Imperial Oil Limited"),
-    ("TPL", "Texas Pacific Land Corporation"),
-    ("CQP", "Cheniere Energy Partners, L.P."),
-    ("TCANF", "TC Energy Corporation"),
-    ("WDS", "Woodside Energy Group Ltd."),
-    ("PUTRY", "PTT Public Company Limited"),
-    ("WOPEF", "Woodside Energy Group Ltd."),
-    ("EQT", "EQT Corporation"),
-    ("CVE", "Cenovus Energy Inc."),
-    ("DVN", "Devon Energy Corporation"),
-    ("HAL", "Halliburton Company")
 ]
 
 # Extract tickers and company names
@@ -113,7 +88,9 @@ for i in range(len(tickers)):
     else:
         print(f"Error fetching data for {symbol}: {response.status_code}")
 
-print(final_df)
+
+
+
 
 
 
