@@ -41,7 +41,7 @@ outputsize = "full"
 apikey = "QMRWLT6SQ6Y1WBWX"
 
 # Create a DataFrame to store the final results
-final_df = pd.DataFrame(columns=["Name", "Ticker", "Stock Price", "Volatility"])
+final_df = pd.DataFrame(columns=["Name", "Ticker", "Current Stock Price", "Volatility"])
 
 # Function to calculate volatility
 def get_volatility(df):
