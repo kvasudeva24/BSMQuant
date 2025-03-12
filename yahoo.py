@@ -1,13 +1,10 @@
-import numpy as np
-import pandas as pd
-import requests
-import os
+import yfinance as yf
+import pandas as pd 
+import numpy as np  
 from scipy.stats import norm as N
 
-# CSV filename
-csv_filename = "energy_companies_stock_data.csv"
+final_df = pd.DataFrame(columns=["Name", "Ticker", "Current Stock Price", "Volatility"])
 
-# List of energy companies
 energy_companies = [
     ("XOM", "Exxon Mobil Corporation"), ("CVX", "Chevron Corporation"),
     ("SHEL", "Shell plc"), ("RYDAF", "Shell plc"), ("TTE", "TotalEnergies SE"),
@@ -34,72 +31,39 @@ energy_companies = [
     ("HAL", "Halliburton Company")
 ]
 
-# API 
-function = "TIME_SERIES_DAILY"
-outputsize = "full"
-apikeys = ["QMRWLT6SQ6Y1WBWX", "9HUJ8R00XNDPFRKT"]
 
-# volatility
-def get_volatility(df):
-    return np.std(df["Close"].values) if not df.empty else np.nan
+# data = yf.Ticker("XOM")
+# close = data.history(period="252d")["Close"]
+# volatility = np.std(close)
+# new_row = [energy_companies[0][1], energy_companies[0][0], close.iloc[251], volatility]
+# final_df.loc[len(final_df)] = new_row
 
-# fetch data only if the CSV file does not exist
-if not os.path.exists(csv_filename):
-    print("Fetching stock data from API...")
 
-    # df to store final results
-    final_df = pd.DataFrame(columns=["Name", "Ticker", "Current Stock Price", "Volatility"])
-
-    for i, (symbol, company_name) in enumerate(energy_companies):
-        apikey = apikeys[i // 25]  # switch API key every 25 requests
-        url = f"https://www.alphavantage.co/query?function={function}&symbol={symbol}&outputsize={outputsize}&apikey={apikey}"
-
-        response = requests.get(url)
-
-        if response.status_code == 200:
-            data = response.json()
-            if "Error Message" in data or "Note" in data:
-                print(f"API limit reached or invalid request for {symbol}. Skipping...")
-                continue
-
-            time_series = data.get("Time Series (Daily)", {})
-            if not time_series:
-                print(f"Warning: No data found for {symbol}")
-                print(data)
-                continue
-
-            df = pd.DataFrame.from_dict(time_series, orient="index")
-            df.columns = ["Open", "High", "Low", "Close", "Volume"]
-            df = df.astype({"Open": float, "High": float, "Low": float, "Close": float, "Volume": int})
-            df.index.name = "Date"
-            df = df.reset_index()
-
-            df_252 = df.head(min(252, len(df)))
-            stock_price = df_252["Close"].iloc[0] if not df_252.empty else np.nan
-            volatility = get_volatility(df_252)
-
-            final_df.loc[len(final_df)] = [company_name, symbol, stock_price, volatility]
-        else:
-            print(f"Error fetching data for {symbol}: {response.status_code}")
-
-    # Save to CSV
-    final_df.to_csv(csv_filename, index=False)
-    print("Data collection complete. CSV file saved.")
-
-# Load stock data from CSV
-df = pd.read_csv(csv_filename)
-df.columns = ["Name", "Ticker", "Stock Price", "Volatility"]
+# Loop through each company in the list
+for ticker, company_name in energy_companies:
+    try:
+        data = yf.Ticker(ticker)
+        close = data.history(period="252d")["Close"]
+        volatility = np.std(close)
+        last_close_price = close.iloc[-1]
+        new_row = [company_name, ticker, last_close_price, volatility]
+        final_df.loc[len(final_df)] = new_row
+    
+    except Exception as e:
+        print(f"Error processing {ticker} ({company_name}): {e}")
 
 risk_free = 0.0416  # Risk-free rate
 
-# User input for ticker symbol
 while True:
-    user_ticker = input("Enter the ticker symbol: ").strip().upper()
-    if user_ticker in df["Ticker"].values:
-        break
-    print("Ticker not found. Please enter a valid ticker.")
+    try:
+        user_ticker = input("Enter the ticker symbol: ").strip().upper()
+        if user_ticker in final_df["Ticker"].values:
+            break
+        print("Invalid ticker symbol. Please enter a valid ticker symbol.")
+    except ValueError:
+        print("Invalid input. Please enter a valid ticker symbol.")
 
-# User input for strike price
+
 while True:
     try:
         user_strike = float(input("Enter the strike price: $").strip())
@@ -108,6 +72,8 @@ while True:
         print("Strike price must be positive.")
     except ValueError:
         print("Invalid input. Please enter a valid number.")
+
+
 
 # User input for time frame
 while True:
@@ -129,9 +95,9 @@ while True:
 
 # Black-Scholes function
 def black_scholes(user_ticker, user_strike, user_time, option_type):
-    stock_row = df.loc[df["Ticker"] == user_ticker]
+    stock_row = final_df.loc[final_df["Ticker"] == user_ticker]
 
-    stock_price = stock_row["Stock Price"].values[0]
+    stock_price = stock_row["Current Stock Price"].values[0]
     volatility = stock_row["Volatility"].values[0] / 100  
 
     d1 = (np.log(stock_price / user_strike) + (risk_free + (volatility ** 2) / 2) * user_time) / (volatility * np.sqrt(user_time))
