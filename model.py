@@ -65,11 +65,14 @@ if not os.path.exists(csv_filename):
             time_series = data.get("Time Series (Daily)", {})
             if not time_series:
                 print(f"Warning: No data found for {symbol}")
+                print(data)
                 continue
 
+            df = pd.DataFrame.from_dict(time_series, orient="index")
             df.columns = ["Open", "High", "Low", "Close", "Volume"]
-            df.index = pd.to_datetime(df.index)
-            df = df.sort_index(ascending=False).astype(float)
+            df = df.astype({"Open": float, "High": float, "Low": float, "Close": float, "Volume": int})
+            df.index.name = "Date"
+            df = df.reset_index()
 
             df_252 = df.head(min(252, len(df)))
             stock_price = df_252["Close"].iloc[0] if not df_252.empty else np.nan
